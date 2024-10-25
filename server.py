@@ -1,20 +1,29 @@
+"""File providing the server and route handlers."""
 from flask import Flask, render_template, request
 from EmotionDetection.emotion_detection import emotion_detector
-import json
 
 app = Flask("Emotion Detector")
 
 @app.route("/emotionDetector")
 def emotion_detetion_action():
+    """Emotion detection handler."""
     text_to_analyze = request.args.get('textToAnalyze')
 
     response = emotion_detector(text_to_analyze)
     emotions = ''.join([f"'{key}': {value}, " for key, value in response.items()])
-
-    return "For the given statement, the system response is {} The dominant emotion is <b>{}</b>.".format(emotions, response['dominant_emotion'])
+    if response['dominant_emotion'] is None:
+        text = 'Invalid text! Please try again!.'
+    else:
+        text = f'''
+            For the given statement, the system response
+            is {emotions}. The dominant emotion 
+            is <b>{response['dominant_emotion']}</b>.
+        '''
+    return text
 
 @app.route("/")
 def render_index_page():
+    """Index page handler"""
     return render_template('index.html')
 
 if __name__ == "__main__":
